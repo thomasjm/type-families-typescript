@@ -2,11 +2,13 @@
 
 This is a demonstration of how to map a certain cool API design pattern from Haskell to a TypeScript client library.
 
-The pattern comes from the [lsp-types](https://github.com/alanz/lsp/tree/master/lsp-types), which helps power [haskell-language-server](https://github.com/haskell/haskell-language-server/).
+The pattern comes from the [lsp-types](https://github.com/alanz/lsp/tree/master/lsp-types) library, which helps power [haskell-language-server](https://github.com/haskell/haskell-language-server/).
 
-Suppose you want to write a service that deals with two kinds of messages: "requests" and "notifications." Requests have an ID attached and require a response containing the same ID, whereas notifications don't require a response. Messages can be sent from either the client or server.
+Here's the basic setup:
 
-Let's suppose our API supports two client-to-server messages: one a request called `Login` and one a notification called `ReportClick`. We write out our data types like this:
+> Suppose you want to write a service that deals with two kinds of messages: "requests" and "notifications." Requests have an ID attached and require a response containing the same ID, whereas notifications don't require a response. Messages can be sent from either the client or server.
+
+Let's suppose we want to make such an API which supports two client-to-server messages: one a request called `Login` and one a notification called `ReportClick`. We write out our data types like this:
 
 ``` haskell
 data From = FromServer | FromClient
@@ -45,6 +47,8 @@ data ResponseMessage (m :: Method f 'Request) =
     } deriving Generic
 ```
 
+As you can see, a `RequestMessage` has an `id` while a `NotificationMessage` does not. A `ResponseMessage` contains a `result`, which an be either a failure or a successful value. Each message is parameterized by a version of `Method`.
+
 Notice how these message constructors define their `params` and `result` in terms of a type family call. Let's write those type families now:
 
 ``` haskell
@@ -55,3 +59,5 @@ type family MessageParams (m :: Method f t) :: Kind.Type where
 type family ResponseResult (m :: Method f 'Request) :: Kind.Type where
   ResponseResult 'Login = LoginResult
 ```
+
+Once you add some boilerplate `ToJSON/FromJSON/Eq/Ord` instances to this you have a working set of types to define a server with. I won't go in detail about why this is great, but you can look at `haskell-language-server` to see how this setup adds a lot of type safety to your server, helping make sure you return the right response type to each message etc.
