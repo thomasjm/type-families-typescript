@@ -51,7 +51,7 @@ data ResponseMessage (m :: Method f 'Request) =
     } deriving Generic
 ```
 
-As you can see, a `RequestMessage` has an `id` while a `NotificationMessage` does not. A `ResponseMessage` contains a `result`, which an be either a failure or a successful value. Each message is parameterized by a version of `Method`. Don't worry about `SMethod`, it's just a counterpart to `Method` that's easier to use at the term level.
+As you can see, a `RequestMessage` has an `id` while a `NotificationMessage` does not. A `ResponseMessage` contains a `result`, which can be either a failure or a successful value. Each message is parameterized by a version of `Method`. (Don't worry about `SMethod`, it's just a counterpart to `Method` that's easier to use at the term level.)
 
 Notice how these message constructors define their `params` and `result` in terms of a type family call. Let's write those type families now:
 
@@ -66,7 +66,7 @@ type family ResponseResult (m :: Method f 'Request) :: Kind.Type where
 
 Now we can define the parameter and result types for each method!
 
-I won't go in detail about why this is great, but you can look at `haskell-language-server` to see how this setup adds a lot of type safety to your server, helping make sure you return the right response type to each message, etc.
+I won't go in detail about why this is great, but you can look at `haskell-language-server` to see how this setup adds a lot of type safety to your server, making sure you return the right response type to each message, etc.
 
 ## Mapping it to TypeScript
 
@@ -77,13 +77,13 @@ If you're familiar with `aeson-typescript`, you know you can use it to generate 
 ``` haskell
 import Data.Aeson.TypeScript.TH
 
-data LoginParams = LoginParams { ... }
+data LoginParams = LoginParams { username :: T.Text, password :: T.Text }
 $(deriveJSONAndTypeScript A.defaultOptions ''LoginParams)
 
 data ReportClickParams = ReportClickParams { ... }
 $(deriveJSONAndTypeScript A.defaultOptions ''ReportClickParams)
 
-data LoginResult = LoginResult { ... }
+data LoginResult = LoginResult { profilePicture :: T.Text }
 $(deriveJSONAndTypeScript A.defaultOptions ''LoginResult)
 
 main = do
@@ -94,13 +94,15 @@ main = do
   )
 ```
 
-This is a good start, but it doesn't include the mapping between parameter and result types. What we're really like to be able to write is a TypeScript function like this:
+This will output some TypeScript interfaces for these types, suitable for putting in a `.d.ts` file.
+
+It's a good start, but it doesn't include the mapping between parameter and result types. What we're really like to be able to write is a TypeScript function like this:
 
 ``` typescript
 function sendRequest<T extends keyof RequestMethods>(key: T, params: MessageParams<T>): Promise<ResponseResult<T>>;
 ```
 
-If you had a function like this, you could call it like this:
+If you had a function like this, plus the required [lookup types](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html), you could call it like this:
 
 ``` typescript
 const result = await sendRequest("login", {username, password}); // The message params are typechecked
