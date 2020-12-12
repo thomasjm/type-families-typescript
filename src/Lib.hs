@@ -16,41 +16,20 @@ import qualified Data.Text as T
 import Data.Kind as Kind
 import GHC.Generics
 import Misc
+import Params
+import Results
 
+
+-- * Method
 
 data From = FromServer | FromClient
 data MethodType = Notification | Request
 
 data Method (f :: From) (t :: MethodType) where
-  Authenticate :: Method 'FromClient 'Request
-  Render :: Method 'FromClient 'Request
+  Login :: Method 'FromClient 'Request
+  ReportClick :: Method 'FromClient 'Request
 
-instance A.ToJSON (Method f t) where
-  toJSON Authenticate = A.String "authenticate"
-  toJSON Render = A.String "render"
-
-data SMethod (m :: Method f t) where
-  SRender :: SMethod 'Render
-  SAuthenticate :: SMethod 'Authenticate
-
-data SomeMethod where
-  SomeMethod :: forall m. SMethod m -> SomeMethod
-
-instance A.FromJSON SomeMethod where
-  parseJSON = undefined
-
-deriveTypeScript A.defaultOptions ''Method
-
-type family MessageParams (m :: Method f t) :: Kind.Type where
-  MessageParams 'Render = RenderParams
-  MessageParams 'Authenticate = Empty
-
-type family ResponseResult (m :: Method f Request) :: Kind.Type where
-  ResponseResult 'Render = Int
-  ResponseResult 'Authenticate = Empty
-
-class Foo a where
-  getString :: a -> String
+-- * Message types
 
 data RequestMessage (m :: Method f 'Request) =
   RequestMessage {
@@ -65,8 +44,34 @@ data NotificationMessage (m :: Method f 'Notification) =
     , _params  :: MessageParams m
     } deriving Generic
 
-data RenderParams = RenderParams {
-  renderDocument :: T.Text
-  , renderCode :: T.Text
-  }
-$(deriveJSONAndTypeScript A.defaultOptions ''RenderParams)
+data ResponseMessage (m :: Method f 'Request) =
+  ResponseMessage
+    { _id :: Maybe T.Text
+    , _result :: Either String (ResponseResult m)
+    } deriving Generic
+
+-- * Type families
+
+type family MessageParams (m :: Method f t) :: Kind.Type where
+  MessageParams 'Login = LoginParams
+  MessageParams 'ReportClick = ReportClickParams
+
+type family ResponseResult (m :: Method f 'Request) :: Kind.Type where
+  ResponseResult 'Login = LoginResult
+
+
+instance A.ToJSON (Method f t) where
+  toJSON ReportClick = A.String "authenticate"
+  toJSON Login = A.String "login"
+
+data SMethod (m :: Method f t) where
+  SLogin :: SMethod 'Login
+  SReportClick :: SMethod 'ReportClick
+
+data SomeMethod where
+  SomeMethod :: forall m. SMethod m -> SomeMethod
+
+instance A.FromJSON SomeMethod where
+  parseJSON = undefined
+
+deriveTypeScript A.defaultOptions ''Method

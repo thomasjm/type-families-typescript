@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1c89b0852359dbc876f24dc470592a662ac698afc8df776343a86d207c1c2dcc
+-- hash: adbdb55f1c4f95d7aaef131dcc4f95d83c61567ca5e10d92071cc8608e388a5f
 
 name:           type-families-typescript
 version:        0.1.0.0
@@ -29,6 +29,8 @@ library
   exposed-modules:
       Lib
       Misc
+      Params
+      Results
   other-modules:
       Paths_type_families_typescript
   hs-source-dirs:
