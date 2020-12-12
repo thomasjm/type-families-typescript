@@ -1,3 +1,3 @@
-# Changelog for type-families-typscript
+# Changelog for type-families-typescript
 
 ## Unreleased changes

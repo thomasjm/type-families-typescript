@@ -1,1 +1,1 @@
-# type-families-typscript
+# type-families-typescript
