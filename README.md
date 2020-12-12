@@ -2,13 +2,17 @@
 
 This is a demonstration of how to map a certain cool API design pattern from Haskell to a TypeScript client library.
 
-The pattern comes from the [lsp-types](https://github.com/alanz/lsp/tree/master/lsp-types) library, which helps power [haskell-language-server](https://github.com/haskell/haskell-language-server/).
+## The Setup
 
-Here's the basic setup:
+Suppose you want to write a service that deals with two kinds of messages: "requests" and "notifications." Requests have an ID attached and require a response containing the same ID, whereas notifications don't require a response. Messages can be sent from either the client or server.
 
-> Suppose you want to write a service that deals with two kinds of messages: "requests" and "notifications." Requests have an ID attached and require a response containing the same ID, whereas notifications don't require a response. Messages can be sent from either the client or server.
+This is a nice general framework for a service and is how the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) is designed.
 
-Let's suppose we want to make such an API which supports two client-to-server messages: one a request called `Login` and one a notification called `ReportClick`. We write out our data types like this:
+## The Haskell pattern
+
+What's the best way to represent this service in Haskell types? The following pattern comes from the [lsp-types](https://github.com/alanz/lsp/tree/master/lsp-types) library, which helps power [haskell-language-server](https://github.com/haskell/haskell-language-server/).
+
+Let's suppose we want our API to support two client-to-server messages: one a request called `Login` and one a notification called `ReportClick`. We write out our data types like this:
 
 ``` haskell
 data From = FromServer | FromClient
@@ -60,4 +64,6 @@ type family ResponseResult (m :: Method f 'Request) :: Kind.Type where
   ResponseResult 'Login = LoginResult
 ```
 
-Once you add some boilerplate `ToJSON/FromJSON/Eq/Ord` instances to this you have a working set of types to define a server with. I won't go in detail about why this is great, but you can look at `haskell-language-server` to see how this setup adds a lot of type safety to your server, helping make sure you return the right response type to each message etc.
+Once you add some boilerplate `ToJSON/FromJSON/Eq/Ord` instances to this you have a working set of types for defining a server. I won't go in detail about why this is great, but you can look at `haskell-language-server` to see how this setup adds a lot of type safety to your server, helping make sure you return the right response type to each message, etc.
+
+## Mapping it to TypeScript
