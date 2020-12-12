@@ -51,7 +51,7 @@ data ResponseMessage (m :: Method f 'Request) =
     } deriving Generic
 ```
 
-As you can see, a `RequestMessage` has an `id` while a `NotificationMessage` does not. A `ResponseMessage` contains a `result`, which an be either a failure or a successful value. Each message is parameterized by a version of `Method`.
+As you can see, a `RequestMessage` has an `id` while a `NotificationMessage` does not. A `ResponseMessage` contains a `result`, which an be either a failure or a successful value. Each message is parameterized by a version of `Method`. Don't worry about `SMethod`, it's just a counterpart to `Method` that's easier to use at the term level.
 
 Notice how these message constructors define their `params` and `result` in terms of a type family call. Let's write those type families now:
 
@@ -64,6 +64,8 @@ type family ResponseResult (m :: Method f 'Request) :: Kind.Type where
   ResponseResult 'Login = LoginResult
 ```
 
-Once you add some boilerplate `ToJSON/FromJSON/Eq/Ord` instances to this you have a working set of types for defining a server. I won't go in detail about why this is great, but you can look at `haskell-language-server` to see how this setup adds a lot of type safety to your server, helping make sure you return the right response type to each message, etc.
+Now we can define the parameter and result types for each method!
+
+I won't go in detail about why this is great, but you can look at `haskell-language-server` to see how this setup adds a lot of type safety to your server, helping make sure you return the right response type to each message, etc.
 
 ## Mapping it to TypeScript
