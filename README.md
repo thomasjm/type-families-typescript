@@ -69,3 +69,40 @@ Now we can define the parameter and result types for each method!
 I won't go in detail about why this is great, but you can look at `haskell-language-server` to see how this setup adds a lot of type safety to your server, helping make sure you return the right response type to each message, etc.
 
 ## Mapping it to TypeScript
+
+Now the question is, how can I generate a TypeScript client library for my service that has the same amount of type safety?
+
+If you're familiar with `aeson-typescript`, you know you can use it to generate TypeScript representations of Haskell data types. For example, I could emit types for all of the input and output types:
+
+``` haskell
+import Data.Aeson.TypeScript.TH
+
+data LoginParams = LoginParams { ... }
+$(deriveJSONAndTypeScript A.defaultOptions ''LoginParams)
+
+data ReportClickParams = ReportClickParams { ... }
+$(deriveJSONAndTypeScript A.defaultOptions ''ReportClickParams)
+
+data LoginResult = LoginResult { ... }
+$(deriveJSONAndTypeScript A.defaultOptions ''LoginResult)
+
+main = do
+  putStrLn $ formatTSDeclarations $ (
+    (getTypeScriptDeclaration (Proxy :: Proxy LoginParams))
+    <> (getTypeScriptDeclaration (Proxy :: Proxy ReportClickParams))
+    <> (getTypeScriptDeclaration (Proxy :: Proxy LoginResult))
+  )
+```
+
+This is a good start, but it doesn't include the mapping between parameter and result types. What we're really like to be able to write is a TypeScript function like this:
+
+``` typescript
+function sendRequest<T extends keyof RequestMethods>(key: T, params: MessageParams<T>): Promise<ResponseResult<T>>;
+```
+
+If you had a function like this, you could call it like this:
+
+``` typescript
+const result = await sendRequest("login", {username, password}); // The message params are typechecked
+console.log("Got profile picture: " + result.profilePicture); // The result is also typechecked!
+```
