@@ -99,12 +99,17 @@ This will output some TypeScript interfaces for these types, suitable for puttin
 It's a good start, but it doesn't include the mapping between parameter and result types. What we're really like to be able to write is a TypeScript function like this:
 
 ``` typescript
-function sendRequest<T extends keyof RequestMethods>(key: T, params: MessageParams<T>): Promise<ResponseResult<T>>;
+function sendRequest<T extends keyof RequestMethods>(
+  key: T, params: MessageParams<T>
+): Promise<ResponseResult<T>>;
 ```
 
 If you had a function like this, plus the required [lookup types](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html), you could call it like this:
 
 ``` typescript
-const result = await sendRequest("login", {username, password}); // The message params are typechecked
-console.log("Got profile picture: " + result.profilePicture); // The result is also typechecked!
+// The message params are typechecked
+const result = await sendRequest("login", {username, password});
+
+// The result is also typechecked!
+console.log("Got profile picture: " + result.profilePicture);
 ```
