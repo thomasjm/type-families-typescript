@@ -3,7 +3,6 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE TypeInType #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -12,30 +11,27 @@
 module Lib where
 
 import qualified Data.Aeson as A
-import qualified Data.Aeson.TH as A
 import Data.Aeson.TypeScript.TH
 import qualified Data.Text as T
 import Data.Kind as Kind
-import Data.Proxy
 import GHC.Generics
 import Misc
-import TH
 
 
 data From = FromServer | FromClient
 data MethodType = Notification | Request
 
 data Method (f :: From) (t :: MethodType) where
-  Authenticate :: Method FromClient Request
-  Render :: Method FromClient Request
+  Authenticate :: Method 'FromClient 'Request
+  Render :: Method 'FromClient 'Request
 
 instance A.ToJSON (Method f t) where
   toJSON Authenticate = A.String "authenticate"
   toJSON Render = A.String "render"
 
 data SMethod (m :: Method f t) where
-  SRender :: SMethod Render
-  SAuthenticate :: SMethod Authenticate
+  SRender :: SMethod 'Render
+  SAuthenticate :: SMethod 'Authenticate
 
 data SomeMethod where
   SomeMethod :: forall m. SMethod m -> SomeMethod
@@ -43,13 +39,7 @@ data SomeMethod where
 instance A.FromJSON SomeMethod where
   parseJSON = undefined
 
--- A.deriveJSON A.defaultOptions ''SomeMethod
--- deriveJSONAndTypeScript A.defaultOptions ''Method
-
 deriveTypeScript A.defaultOptions ''Method
-
-
-
 
 type family MessageParams (m :: Method f t) :: Kind.Type where
   MessageParams 'Render = RenderParams

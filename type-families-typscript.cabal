@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: dfc6d651c02d347f9d3dd62cb06bfdee991135e6db53d378c89d8a188f114437
+-- hash: db3c7e54fa18e4fd06ef85aef5d342e6f33815565ae1f11891625494f55a43e4
 
 name:           type-families-typscript
 version:        0.1.0.0
@@ -29,7 +29,6 @@ library
   exposed-modules:
       Lib
       Misc
-      TH
   other-modules:
       Paths_type_families_typscript
   hs-source-dirs:
@@ -39,9 +38,7 @@ library
     , aeson-typescript
     , base >=4.7 && <5
     , containers
-    , template-haskell
     , text
-    , th-abstraction
   default-language: Haskell2010
 
 executable type-families-typscript-exe
@@ -56,9 +53,7 @@ executable type-families-typscript-exe
     , aeson-typescript
     , base >=4.7 && <5
     , containers
-    , template-haskell
     , text
-    , th-abstraction
     , type-families-typscript
   default-language: Haskell2010
 
@@ -75,8 +70,6 @@ test-suite type-families-typscript-test
     , aeson-typescript
     , base >=4.7 && <5
     , containers
-    , template-haskell
     , text
-    , th-abstraction
     , type-families-typscript
   default-language: Haskell2010

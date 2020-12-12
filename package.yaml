@@ -24,9 +24,7 @@ dependencies:
 - aeson
 - aeson-typescript
 - containers
-- template-haskell
 - text
-- th-abstraction
 
 library:
   source-dirs: src

@@ -11,7 +11,6 @@ import Data.Proxy
 import qualified Data.Set as S
 import qualified Data.Text as T
 import Lib
-import TH
 
 
 main :: IO ()
