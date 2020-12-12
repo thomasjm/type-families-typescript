@@ -46,3 +46,12 @@ data ResponseMessage (m :: Method f 'Request) =
 ```
 
 Notice how these message constructors define their `params` and `result` in terms of a type family call. Let's write those type families now:
+
+``` haskell
+type family MessageParams (m :: Method f t) :: Kind.Type where
+  MessageParams 'Login = LoginParams
+  MessageParams 'ReportClick = ReportClickParams
+
+type family ResponseResult (m :: Method f 'Request) :: Kind.Type where
+  ResponseResult 'Login = LoginResult
+```

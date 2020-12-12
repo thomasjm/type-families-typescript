@@ -59,6 +59,7 @@ type family MessageParams (m :: Method f t) :: Kind.Type where
 type family ResponseResult (m :: Method f 'Request) :: Kind.Type where
   ResponseResult 'Login = LoginResult
 
+-- * Instances
 
 instance A.ToJSON (Method f t) where
   toJSON ReportClick = A.String "authenticate"
