@@ -11,9 +11,11 @@
 module Lib where
 
 import qualified Data.Aeson as A
+import Control.Applicative
 import Data.Aeson.TypeScript.TH
 import qualified Data.Text as T
 import Data.Kind as Kind
+import Data.Void
 import GHC.Generics
 import Misc
 import Params
@@ -58,12 +60,9 @@ type family MessageParams (m :: Method f t) :: Kind.Type where
 
 type family ResponseResult (m :: Method f 'Request) :: Kind.Type where
   ResponseResult 'Login = LoginResult
+  ResponseResult _ = Void
 
--- * Instances
-
-instance A.ToJSON (Method f t) where
-  toJSON ReportClick = A.String "authenticate"
-  toJSON Login = A.String "login"
+-- * Helper data
 
 data SMethod (m :: Method f t) where
   SLogin :: SMethod 'Login
@@ -72,7 +71,31 @@ data SMethod (m :: Method f t) where
 data SomeMethod where
   SomeMethod :: forall m. SMethod m -> SomeMethod
 
+data SomeClientMethod = forall t (m :: Method FromClient t). SomeClientMethod (SMethod m)
+data SomeServerMethod = forall t (m :: Method FromServer t). SomeServerMethod (SMethod m)
+
+-- * Instances
+
+instance A.ToJSON (Method f t) where
+  toJSON Login = A.String "login"
+  toJSON ReportClick = A.String "report_click"
+
+instance A.FromJSON SomeClientMethod where
+  parseJSON (A.String "login") = pure $ SomeClientMethod SLogin
+  parseJSON (A.String "report_click") = pure $ SomeClientMethod SReportClick
+  parseJSON _ = mempty
+
+instance A.FromJSON SomeServerMethod where
+  parseJSON _ = mempty
+
 instance A.FromJSON SomeMethod where
-  parseJSON = undefined
+  parseJSON v = client <|> server
+    where
+      client = do
+        SomeClientMethod m <- A.parseJSON v
+        pure $ SomeMethod m
+      server = do
+        SomeServerMethod m <- A.parseJSON v
+        pure $ SomeMethod m
 
 deriveTypeScript A.defaultOptions ''Method

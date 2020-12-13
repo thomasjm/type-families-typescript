@@ -10,6 +10,7 @@ import Data.Function
 import Data.Proxy
 import qualified Data.Set as S
 import qualified Data.Text as T
+import Data.Type.Equality
 import Lib
 
 
@@ -25,12 +26,20 @@ main = do
     & mconcat
     & S.fromList & S.toList -- uniquify
 
+  putStrLn ""
+
   -- Build TypeScript lookup types for our message tables and print them
   let paramsLookupTableDecl = $(typeFamilyToLookupType ''Method ''MessageParams)
   let resultLookupTableDecl = $(typeFamilyToLookupType ''Method ''ResponseResult)
-  putStrLn $ formatTSDeclarations ([paramsLookupTableDecl, resultLookupTableDecl])
+  putStrLn $ formatTSDeclarations ([paramsLookupTableDecl
+                                   , resultLookupTableDecl
+                                   ])
+
+  putStrLn ""
 
   -- Print handler types to demonstrate using the lookup types
-  putStrLn ""
   putStrLn "type RequestHandler<T extends keyof MessageParamsLookup> = (key: T, params: MessageParamsLookup<T>): Promise<ResponseResultLookup<T>>};"
   putStrLn "type NotificationHandler<T extends keyof MessageParamsLookup> = (key: T, params: T);"
+
+
+someNoti = ReportClick
